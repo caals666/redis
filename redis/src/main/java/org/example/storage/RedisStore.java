@@ -11,11 +11,9 @@ public class RedisStore {
         serverSocket.setReuseAddress(true);
         serverSocket.bind(new InetSocketAddress(9000));
 
-        // Virtual thread executor - can handle millions of concurrent connections
         try (ExecutorService executor =
                      Executors.newVirtualThreadPerTaskExecutor()) {
 
-            System.out.println("Virtual thread TCP server on port 9000");
 
             while (true) {
                 Socket socket = serverSocket.accept();
@@ -28,7 +26,7 @@ public class RedisStore {
                         while ((line = in.readLine()) != null) {
                             out.println(line);
                         }
-                    } catch (IOException e) { /* handle */ }
+                    } catch (IOException e) {}
                 });
             }
         }
