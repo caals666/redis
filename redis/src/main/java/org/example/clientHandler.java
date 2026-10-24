@@ -1,8 +1,9 @@
 package org.example;
 
+import org.example.util.*;
+
 import java.io.*;
 import java.net.*;
-import java.util.Objects;
 
 public class clientHandler implements Runnable {
     private final Socket clientSocket;
@@ -13,25 +14,27 @@ public class clientHandler implements Runnable {
 
     @Override
     public void run() {
-        try(Socket client = clientSocket;
-        BufferedReader in_socket = new BufferedReader(new InputStreamReader(client.getInputStream()));
-        PrintWriter out_socket = new PrintWriter(client.getOutputStream(), true);){
-            System.out.println("Client connected at: "+clientSocket.getInetAddress()+":"+clientSocket.getPort());
-            String input;
-            while ((input = in_socket.readLine()) != null) {
-                if ("COMMAND".equals(input)) {
-                    out_socket.print("*0\r\n");
-                    out_socket.flush();
-                }
-                if ("PING".equals(input)) {
-                    out_socket.print("+PONG\r\n");
-                    out_socket.flush();
-                }
+        try (Socket client = clientSocket;
+             BufferedInputStream in  = new BufferedInputStream(client.getInputStream());
+             BufferedOutputStream out = new BufferedOutputStream(client.getOutputStream())) {
+
+            System.out.println("Client connected: " + client.getRemoteSocketAddress());
+
+            CommandReader reader = new CommandReader(in, out);
+            while (clientSocket.isConnected()) {
+                reader.read();
             }
 
-        } catch(IOException e){
-            System.err.println("Connection error from "
-                    + clientSocket.getRemoteSocketAddress() + ": " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Client Disconnected from "
+                    + clientSocket.getRemoteSocketAddress()+"\n");
+        }
+        finally {
+            try {
+                clientSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
     }
 }
