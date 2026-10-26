@@ -20,9 +20,15 @@ public class clientHandler implements Runnable {
 
             System.out.println("Client connected: " + client.getRemoteSocketAddress());
 
-            CommandReader reader = new CommandReader(in, out);
+            RespReader reader = new RespReader(in, out);
             while (clientSocket.isConnected()) {
-                reader.read();
+                RespValue value;
+                try{
+                    value = reader.read();
+                }
+                catch (Exception e){
+                    break;
+                }
             }
 
         } catch (IOException e) {

@@ -1,14 +1,19 @@
 package org.example;
 
+import org.example.storage.RedisStore;
+import org.example.util.CommandHandler;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Main {
+public class Server {
     private static int port=6969;
-    private static ExecutorService executor=Executors.newCachedThreadPool();
+    private static final ExecutorService executor=Executors.newVirtualThreadPerTaskExecutor();
+    private static final RedisStore store=new RedisStore();
+    private static final CommandHandler commandHandler=new CommandHandler(store);
 
     public static void main(String[] args) {
         for (int i = 0; i < args.length; i++) {
@@ -19,7 +24,7 @@ public class Main {
         }
 
         try (ServerSocket serverSocket = new ServerSocket(port)){
-            while (true) {
+            while (!serverSocket.isClosed()) {
                 try {
                     Socket client = serverSocket.accept();
                     executor.submit(new clientHandler(client));
