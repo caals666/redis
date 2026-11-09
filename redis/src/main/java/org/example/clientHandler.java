@@ -1,9 +1,14 @@
 package org.example;
 
-import org.example.util.*;
+import org.example.command.Command;
+import org.example.command.CommandHandler;
+import org.example.protocol.RespReader;
+import org.example.protocol.RespValue;
+import org.example.util.RespWriter;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 
 public class clientHandler implements Runnable {
     private final Socket clientSocket;
@@ -25,11 +30,21 @@ public class clientHandler implements Runnable {
                 RespValue value;
                 try{
                     value = reader.read();
+                    if(value.getStringValue().equals("COMMAND")) {
+                        String emptyArray = "*0\r\n";
+                        out.write(emptyArray.getBytes(StandardCharsets.UTF_8));
+                        out.flush();
+                    }
                 }
                 catch (Exception e){
                     break;
                 }
             }
+            Command command = Command.fromRespValue(value);
+            RespValue response = CommandHandler.execute(command);
+
+            RespWriter.write(out, response);
+            out.flush();
 
         } catch (IOException e) {
             System.out.println("Client Disconnected from "

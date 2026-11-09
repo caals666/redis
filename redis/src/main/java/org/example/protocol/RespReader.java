@@ -1,15 +1,16 @@
-package org.example.util;
+package org.example.protocol;
 
 import java.io.*;
+import java.nio.Buffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RespReader {
-    private final InputStream in;
-    private final OutputStream out;
+    private final BufferedInputStream in;
+    private final BufferedOutputStream out;
 
-    public RespReader(InputStream in, OutputStream out) {
+    public RespReader(BufferedInputStream in, BufferedOutputStream out) {
         this.in = in;
         this.out = out;
     }
@@ -48,22 +49,22 @@ public class RespReader {
         }
         return RespValue.array(items);
     }
-
+    
     private String readLine() throws IOException {
-        ByteArrayOutputStream buf = new ByteArrayOutputStream(64);
-        int b;
-        while ((b = in.read()) != -1) {
-            if (b == '\n') {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        byte b;
+        while ((b = (byte) in.read()) != -1) {
+            if(b=='\n'){
                 byte[] bytes = buf.toByteArray();
-                int len = bytes.length;
-                if (len > 0 && bytes[len - 1] == '\r') {
-                    len--;
+                int len = 0;
+                if(bytes[bytes.length-1]=='\r'){
+                    len = bytes.length-1;
                 }
                 return new String(bytes, 0, len, StandardCharsets.UTF_8);
             }
             buf.write(b);
         }
-        return buf.toString(StandardCharsets.UTF_8);
+        return new String(buf.toByteArray(), StandardCharsets.UTF_8);
     }
 
     public RespValue readBulkString() throws IOException {
@@ -76,10 +77,6 @@ public class RespReader {
         byte[] bytes = in.readNBytes(length);
         int cr = in.read();
         int lf = in.read();
-        if(cr!='\r'||lf!='\n'){
-            if(lf=='\n'){
-            }
-        }
 
         return RespValue.bulkString(new String(bytes, StandardCharsets.UTF_8));
     }

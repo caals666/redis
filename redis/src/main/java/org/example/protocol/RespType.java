@@ -1,4 +1,4 @@
-package org.example.util;
+package org.example.protocol;
 
 public enum RespType {
     SIMPLE_STRING('+'),

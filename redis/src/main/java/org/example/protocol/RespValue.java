@@ -1,4 +1,4 @@
-package org.example.util;
+package org.example.protocol;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

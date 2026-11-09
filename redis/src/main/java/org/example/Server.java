@@ -1,7 +1,7 @@
 package org.example;
 
 import org.example.storage.RedisStore;
-import org.example.util.CommandHandler;
+import org.example.command.CommandHandler;
 
 import java.io.IOException;
 import java.net.ServerSocket;

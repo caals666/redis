@@ -1,8 +1,7 @@
-package org.example.util;
+package org.example.command;
 
+import org.example.protocol.RespValue;
 import org.example.storage.RedisStore;
-
-import java.util.Locale;
 
 public class CommandHandler {
     private final RedisStore store;
@@ -11,5 +10,7 @@ public class CommandHandler {
         this.store = store;
     }
 
-    
+    public static RespValue execute(Command command) {
+        return RespValue.simpleString("");
+    }
 }
