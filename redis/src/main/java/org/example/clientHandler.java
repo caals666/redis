@@ -26,17 +26,16 @@ public class clientHandler implements Runnable {
             System.out.println("Client connected: " + client.getRemoteSocketAddress());
 
             RespReader reader = new RespReader(in, out);
+            RespValue value = null;
             while (clientSocket.isConnected()) {
-                RespValue value;
-                try{
+                try {
                     value = reader.read();
-                    if(value.getStringValue().equals("COMMAND")) {
+                    if (value.getStringValue().equals("COMMAND")) {
                         String emptyArray = "*0\r\n";
                         out.write(emptyArray.getBytes(StandardCharsets.UTF_8));
                         out.flush();
                     }
-                }
-                catch (Exception e){
+                } catch (Exception e) {
                     break;
                 }
             }
