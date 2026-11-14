@@ -23,33 +23,27 @@ public class clientHandler implements Runnable {
     @Override
     public void run() {
         try (Socket client = clientSocket;
-             BufferedInputStream in  = new BufferedInputStream(client.getInputStream());
-             BufferedOutputStream out = new BufferedOutputStream(client.getOutputStream());) {
-
-            System.out.println("Client connected: " + client.getRemoteSocketAddress());
-
+             BufferedInputStream in  = new BufferedInputStream(client.getInputStream(), 64 * 1024);
+             BufferedOutputStream out = new BufferedOutputStream(client.getOutputStream(), 64 * 1024);) {
+            
             RespReader reader = new RespReader(in, out);
             RespValue value = null;
             while (clientSocket.isConnected()) {
                 try {
                     value = reader.read();
-                    System.out.println(value);
                     Command command = Command.fromRespValue(value);
-                    System.out.println("command in clientHandler: "+command);
                     RespValue response = commandHandler.execute(command);
-                    System.out.println("response in clientHandler: "+response);
-
                     RespWriter.write(out, response);
-                    out.flush();
+                    if (in.available() == 0) {
+                        out.flush();
+                    }
                 } catch (Exception e) {
-                    System.out.println("Breaks in clientHandler");
                     break;
                 }
             }
 
         } catch (IOException e) {
-            System.out.println("Client Disconnected from "
-                    + clientSocket.getRemoteSocketAddress()+"\n");
+
         }
         finally {
             try {

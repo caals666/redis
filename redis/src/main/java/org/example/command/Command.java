@@ -25,7 +25,6 @@ public class Command {
                 return null;
             }
             String cmdName = elements.getFirst().getStringValue();
-            System.out.println("cmdName: "+cmdName);
             List<String> cmdArgs = new ArrayList<>();
             for (int i=1;i<elements.size();i++) {
                 RespValue elem = elements.get(i);

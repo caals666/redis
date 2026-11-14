@@ -17,7 +17,6 @@ public class RespWriter {
             writeNullBulkString(out);
             return;
         }
-        System.out.println(Arrays.toString(value.encode()));
         out.write(value.encode());
     }
 

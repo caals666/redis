@@ -18,7 +18,6 @@ public class CommandHandler {
             return RespValue.error("Command is null");
         }
         String name = command.getName().toUpperCase(Locale.ROOT);
-        System.out.println("Command name in Command handler: " + name);
         return switch (name) {
             case "PING" -> handlePing(command);
             case "ECHO" -> handleEcho(command);
@@ -66,9 +65,7 @@ public class CommandHandler {
         String key = command.getArg(0);
         String value = command.getArg(1);
         Long expiryMillis = null;
-        System.out.println("command.getArgCount(): "+command.getArgCount());
         for(int i=2;i<command.getArgCount();i++){
-            System.out.println("Breaks inside for loop: "+i);
             String option = command.getArg(i).toUpperCase(Locale.ROOT);
             if(option.equals("EX")) {
                 try {
@@ -102,17 +99,12 @@ public class CommandHandler {
             }
         }
 
-        System.out.println("For loop completed");
-
         if(expiryMillis != null){
-            System.out.println("Breaks inside if statement after for loop");
             store.set(key, value, expiryMillis);
-            System.out.println("Breaks inside if statement after set loop");
         }
         else{
             store.set(key, value);
         }
-        System.out.println("set command complete");
         return RespValue.simpleString("OK");
     }
 
@@ -135,9 +127,7 @@ public class CommandHandler {
         return RespValue.bulkString(command.getArg(0));
     }
 
-    private static RespValue handlePing(Command command) {
-        System.out.println("Args in commandHandler's ping: "+command.getArgs());
-        if(command.getArgCount()==0){
+    private static RespValue handlePing(Command command) {if(command.getArgCount()==0){
             return RespValue.simpleString("PONG");
         }
         else if(command.getArgCount()==1){

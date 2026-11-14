@@ -24,6 +24,7 @@ public class Server {
             while (!serverSocket.isClosed()) {
                 try {
                     Socket client = serverSocket.accept();
+                    client.setTcpNoDelay(true);
                     executor.submit(new clientHandler(client, new CommandHandler(new RedisStore())));
                 } catch (IOException e) {
                     System.err.println("Error accepting client: " + e.getMessage());
