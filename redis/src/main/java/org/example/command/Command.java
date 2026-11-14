@@ -6,8 +6,8 @@ import org.example.protocol.RespValue;
 import java.util.*;
 
 public class Command {
-    private String name;
-    private List<String> args;
+    private final String name;
+    private final List<String> args;
 
     public Command(String name, List<String> args) {
         this.name = name;
@@ -24,11 +24,12 @@ public class Command {
             if(elements==null){
                 return null;
             }
-            String cmdName = elements.get(0).getStringValue();
+            String cmdName = elements.getFirst().getStringValue();
+            System.out.println("cmdName: "+cmdName);
             List<String> cmdArgs = new ArrayList<>();
-            for(int i=0;i<elements.size();i++){
+            for (int i=1;i<elements.size();i++) {
                 RespValue elem = elements.get(i);
-                cmdArgs.add(elem.getStringValue()!=null?elem.getStringValue():elem.getIntegerValue()!=null?elem.getIntegerValue().toString():"");
+                cmdArgs.add(elem.getStringValue() != null ? elem.getStringValue() : elem.getIntegerValue() != null ? elem.getIntegerValue().toString() : "");
             }
             return new Command(cmdName, cmdArgs);
         }
@@ -38,11 +39,8 @@ public class Command {
             if(raw==null){
                 return null;
             }
-            String parts[] = raw.trim().split(" ");
-            List<String> cmdArgs = new ArrayList<>();
-            for(int i=0;i<parts.length;i++){
-                cmdArgs.add(parts[i]);
-            }
+            String[] parts = raw.trim().split("\\s+");
+            List<String> cmdArgs = new ArrayList<>(Arrays.asList(parts));
             return new Command(parts[0], cmdArgs);
         }
         return null;

@@ -1,7 +1,7 @@
 package org.example;
 
-import org.example.storage.RedisStore;
 import org.example.command.CommandHandler;
+import org.example.storage.RedisStore;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -12,9 +12,6 @@ import java.util.concurrent.Executors;
 public class Server {
     private static int port=6969;
     private static final ExecutorService executor=Executors.newVirtualThreadPerTaskExecutor();
-    private static final RedisStore store=new RedisStore();
-    private static final CommandHandler commandHandler=new CommandHandler(store);
-
     public static void main(String[] args) {
         for (int i = 0; i < args.length; i++) {
             if ("--port".equalsIgnoreCase(args[i]) && i + 1 < args.length) {
@@ -27,7 +24,7 @@ public class Server {
             while (!serverSocket.isClosed()) {
                 try {
                     Socket client = serverSocket.accept();
-                    executor.submit(new clientHandler(client));
+                    executor.submit(new clientHandler(client, new CommandHandler(new RedisStore())));
                 } catch (IOException e) {
                     System.err.println("Error accepting client: " + e.getMessage());
                 }

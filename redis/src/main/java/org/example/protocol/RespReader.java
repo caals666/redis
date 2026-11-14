@@ -22,12 +22,15 @@ public class RespReader {
         char prefix = (char) first;
         switch (prefix) {
             case '+'    -> {
+                System.out.println("Reads simple string");
                 return RespValue.simpleString(readLine());
             }
             case '*'    -> {
+                System.out.println("Reads array");
                 return readArray();
             }
             case '$' -> {
+                System.out.println("Reads bulk string");
                 return readBulkString();
             }
             default -> {
