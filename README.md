@@ -4,6 +4,8 @@
 
 ![Java](https://img.shields.io/badge/java-21-orange) ![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen) ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
+![Redis Clone Demo](docs/demo.gif)
+
 [Features](#features) · [Quick start](#quick-start) · [Benchmarks](#benchmarks) · [How I got there](#how-i-got-there) · [Architecture](#architecture) · [Design decisions](#design-decisions)
 
 ## Features

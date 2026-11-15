@@ -73,7 +73,7 @@ public class CommandHandler {
                     if (ex <= 0) {
                         return RespValue.error("ERR invalid expire time in 'set' command");
                     }
-                    ex = ex * 1000L;
+                    expiryMillis = ex * 1000L;
                     i++;
                 } catch (NumberFormatException e) {
                     return RespValue.error("ERR invalid expire time in 'set' command");
