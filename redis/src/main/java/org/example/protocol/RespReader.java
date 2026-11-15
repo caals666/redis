@@ -1,22 +1,35 @@
 package org.example.protocol;
 
 import java.io.*;
-import java.nio.Buffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RespReader {
-    private final BufferedInputStream in;
-    private final BufferedOutputStream out;
+    private final InputStream in;
+    private final byte[] buffer=new byte[64*1024];
+    private int pos=0;
+    private int limit=0;
 
-    public RespReader(BufferedInputStream in, BufferedOutputStream out) {
+    public RespReader(InputStream in) {
         this.in = in;
-        this.out = out;
+    }
+
+    private void fill() throws IOException {
+        int n=in.read(buffer, 0, buffer.length);
+        pos = 0;
+        limit = n;
+    }
+
+    private int readByte() throws IOException {
+        if(pos==limit){
+            fill();
+        }
+        return Byte.toUnsignedInt(buffer[pos++]);
     }
 
     public RespValue read() throws IOException {
-        int first = in.read();
+        int first = readByte();
         if (first == -1) return null;
 
         char prefix = (char) first;
@@ -49,51 +62,56 @@ public class RespReader {
         }
         return RespValue.array(items);
     }
-    
+
     private String readLine() throws IOException {
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        StringBuilder sb = new StringBuilder();
         byte b;
-        while ((b = (byte) in.read()) != -1) {
+        while ((b = (byte) readByte()) != -1) {
             if(b=='\n'){
-                byte[] bytes = buf.toByteArray();
-                int len = 0;
-                if(bytes[bytes.length-1]=='\r'){
-                    len = bytes.length-1;
+                if(sb.charAt(sb.length()-1)=='\r'){
+                    sb.setLength(sb.length()-1);
                 }
-                return new String(bytes, 0, len, StandardCharsets.UTF_8);
+                return sb.toString();
             }
-            buf.write(b);
+            sb.append((char)b);
         }
-        return new String(buf.toByteArray(), StandardCharsets.UTF_8);
+        return sb.toString();
     }
 
     public RespValue readBulkString() throws IOException {
         int length = Integer.parseInt(readLine());
         if (length == -1) return null;
         if(length==0){
-            readLine();
+            readByte();
+            readByte();
             return RespValue.simpleString("");
         }
-        byte[] bytes = in.readNBytes(length);
-        int cr = in.read();
-        int lf = in.read();
+        byte[] bytes = new byte[length];
+        for(int i=0;i<length;i++){
+            int b = readByte();
+            if(b==-1) throw new EOFException("Unexpected EOF while reading bulk string");
+            bytes[i] = (byte) b;
+        }
+        int cr = readByte();
+        int lf = readByte();
 
         return RespValue.bulkString(new String(bytes, StandardCharsets.UTF_8));
     }
 
     public RespValue readInlineCommand(int firstByte) throws IOException {
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        buf.write(firstByte);
+        StringBuilder sb = new StringBuilder();
+        sb.append((char)firstByte);
 
         int b;
-        while((b=in.read())!=-1){
+        while((b=readByte())!=-1){
             if(b=='\r'||b=='\n'){
                 break;
             }
-            buf.write(b);
+            sb.append((char)b);
         }
 
-        String line = buf.toString(StandardCharsets.UTF_8).trim();
+        String line = sb.toString().trim();
+        if (line.isEmpty()) return RespValue.array(new ArrayList<>());
 
         String[] parts = line.split(" ");
         List<RespValue> items = new ArrayList<>(parts.length);

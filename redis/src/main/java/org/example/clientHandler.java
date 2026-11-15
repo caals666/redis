@@ -25,8 +25,8 @@ public class clientHandler implements Runnable {
         try (Socket client = clientSocket;
              BufferedInputStream in  = new BufferedInputStream(client.getInputStream(), 64 * 1024);
              BufferedOutputStream out = new BufferedOutputStream(client.getOutputStream(), 64 * 1024);) {
-            
-            RespReader reader = new RespReader(in, out);
+
+            RespReader reader = new RespReader(in);
             RespValue value = null;
             while (clientSocket.isConnected()) {
                 try {
